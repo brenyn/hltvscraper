@@ -20,8 +20,6 @@
 import requests
 from bs4 import BeautifulSoup
 
-
-
 testurl = "https://hltv.org/stats/teams/matches/9963/Infinity"
 
 def tablescraper (url):
@@ -36,12 +34,12 @@ def tablescraper (url):
 	
 	# only interested in results table, save results to tablesoup variable
 	tablesoup = soup.tbody
-			
+	
 	# find all tr elements, each element is a unique game.
 	# note: not using css selectors because there are 2 different tr elements used for some reason.
 	# group-2 first and group-1 first. Seems more efficient to just find all tr elements.
 	gameTable = tablesoup.find_all('tr') 
-			
+	
 	for game in gameTable:
 		games.append(dict.fromkeys(listofkeys,None))
 		cells = game.find_all('td')
@@ -53,61 +51,3 @@ def tablescraper (url):
 		gamecount+=1	
 
 	return games
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#	for cell in cells:
-#		if "time" in cell:
-#			print(cell)
-
-
-#print((game.select("td.time")).getText())
-#games[gamecount]['date'] = (cells[0])
-#games[gamecount]['date'] = (unstrippedTime[0]).text
-
-#Initial data structure concept################
-#games = [
-#		{
-#			'date':'11/05/20',
-#			'event':'Loot Bet',
-#			'event2':'Loot Bet',
-#			'opponent':'Gambit Youngsters',
-#			'mapPlayed':'Dust2',
-#			'result':'8 - 16'
-#		}]
-##############################################
-
-#    for cell in cells:
-#        print(cell.getText())	#print values found in td cells
