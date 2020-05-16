@@ -17,9 +17,9 @@ from bs4 import BeautifulSoup
 def tablescraper (url):
 	gamecount = 0
 	
-	games = []
 	listofkeys = ['date','event','opponent','mapPlayed','result']
-
+	gamestats = dict.fromkeys(listofkeys,None)
+	
 	r = requests.get(url)
 	
 	soup = BeautifulSoup(r.text, 'html.parser')
@@ -33,13 +33,10 @@ def tablescraper (url):
 	gameTable = tablesoup.find_all('tr') 
 	
 	for game in gameTable:
-		games.append(dict.fromkeys(listofkeys,None))
 		cells = game.find_all('td')
-		games[gamecount]['date'] = (cells[0].text.strip())
-		games[gamecount]['event'] = (cells[1].text.strip())
-		games[gamecount]['opponent'] = (cells[3].text.strip())
-		games[gamecount]['mapPlayed'] = (cells[4].text.strip())
-		games[gamecount]['result'] = (cells[5].text.strip())
-		gamecount+=1	
-
-	return games
+		gamestats['date'] = (cells[0].text.strip())
+		gamestats['event'] = (cells[1].text.strip())
+		gamestats['opponent'] = (cells[3].text.strip())
+		gamestats['mapPlayed'] = (cells[4].text.strip())
+		gamestats['result'] = (cells[5].text.strip())
+		print(gamestats)
