@@ -21,10 +21,10 @@
 import requests
 from bs4 import BeautifulSoup
 
-matchURLs = ["https://www.hltv.org/stats/teams/matches/8772/Syman?startDate=2020-04-16&endDate=2020-05-16","https://www.hltv.org/stats/teams/matches/7969/Nemiga?startDate=2020-04-16&endDate=2020-05-16"]
+urlList = ["https://www.hltv.org/stats/teams/matches/8772/Syman?startDate=2020-04-16&endDate=2020-05-16","https://www.hltv.org/stats/teams/matches/7969/Nemiga?startDate=2020-04-16&endDate=2020-05-16"]
 
-def tablescraper (url):
-	for url in matchURLs:
+def tablescraper (teamstats):
+	for url in teamstats:
 		gamecount = 0
 		
 		games = []
@@ -52,4 +52,4 @@ def tablescraper (url):
 			games[gamecount]['result'] = (cells[5].text.strip())
 			gamecount+=1
 		
-		#print (games)#print games for test, need to export to csv/excel/google sheets here
+		print (games)#print games for test, need to export to csv/excel/google sheets here
