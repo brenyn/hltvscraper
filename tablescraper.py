@@ -13,6 +13,10 @@
 
 import requests
 from bs4 import BeautifulSoup
+from datetime import date
+import csv
+
+filename = "matchday-"+ str(date.today()) + ".csv"
 
 def tablescraper (url):
 	gamecount = 0
@@ -20,6 +24,12 @@ def tablescraper (url):
 	listofkeys = ['date','event','opponent','mapPlayed','result']
 	gamestats = dict.fromkeys(listofkeys,None)
 	
+	with open (filename,'w') as csvfile:
+		
+		csv_writer = csv.DictWriter(csvfile,fieldnames = listofkeys, delimiter=',')
+		
+		csv_writer.writeheader()
+		
 	r = requests.get(url)
 	
 	soup = BeautifulSoup(r.text, 'html.parser')
@@ -32,11 +42,15 @@ def tablescraper (url):
 	# group-2 first and group-1 first. Seems more efficient to just find all tr elements.
 	gameTable = tablesoup.find_all('tr') 
 	
-	for game in gameTable:
-		cells = game.find_all('td')
-		gamestats['date'] = (cells[0].text.strip())
-		gamestats['event'] = (cells[1].text.strip())
-		gamestats['opponent'] = (cells[3].text.strip())
-		gamestats['mapPlayed'] = (cells[4].text.strip())
-		gamestats['result'] = (cells[5].text.strip())
-		print(gamestats)
+	with open (filename,'a') as csvfile:
+		
+		csv_writer = csv.DictWriter(csvfile,fieldnames = listofkeys, delimiter=',')
+		
+		for game in gameTable:
+			cells = game.find_all('td')
+			gamestats['date'] = (cells[0].text.strip())
+			gamestats['event'] = (cells[1].text.strip())
+			gamestats['opponent'] = (cells[3].text.strip())
+			gamestats['mapPlayed'] = (cells[4].text.strip())
+			gamestats['result'] = (cells[5].text.strip())
+			csv_writer.writerow(gamestats)
