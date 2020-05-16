@@ -110,6 +110,5 @@ for url in gameDayURLs:
 	gameDayURLs[urlCounter] = "https://hltv.org" + url
 	urlCounter += 1
 
-statURLs = []
 for matchURL in gameDayURLs:
 	tablescraper(statfinder(matchURL))
