@@ -5,7 +5,7 @@
 # Date: May 14, 2020
 # Purpose: Prototype that parses a team's stat table and stores in a data structure
 # Input(s): Team's stat page
-# Output(s): TBD
+# Output(s): Write stats to csv
 #
 # Notes to self:
 # 1. Add home team name to list of keys for sorting purposes
@@ -21,7 +21,7 @@ filename = "matchday-"+ str(date.today()) + ".csv"
 def tablescraper (url):
 	gamecount = 0
 	
-	listofkeys = ['date','event','opponent','mapPlayed','result']
+	listofkeys = ['date','event','homeTeam','opponent','mapPlayed','result']
 	gamestats = dict.fromkeys(listofkeys,None)
 	
 	with open (filename,'w') as csvfile:
@@ -33,8 +33,12 @@ def tablescraper (url):
 	r = requests.get(url)
 	
 	soup = BeautifulSoup(r.text, 'html.parser')
-	
+	teamsoup = BeautifulSoup(r.text,'html.parser')
+	teamsoup = teamsoup.find("div",class_="sidebar-box")
+	teamname = teamsoup.find("span",class_="context-item-name").text.strip()
 	# only interested in results table, save results to tablesoup variable
+	
+	#find team name here
 	tablesoup = soup.tbody
 	
 	# find all tr elements, each element is a unique game.
@@ -50,6 +54,7 @@ def tablescraper (url):
 			cells = game.find_all('td')
 			gamestats['date'] = (cells[0].text.strip())
 			gamestats['event'] = (cells[1].text.strip())
+			gamestats['homeTeam'] = teamname
 			gamestats['opponent'] = (cells[3].text.strip())
 			gamestats['mapPlayed'] = (cells[4].text.strip())
 			gamestats['result'] = (cells[5].text.strip())
