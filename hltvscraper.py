@@ -6,11 +6,33 @@
 # Purpose: Complete prototype combining urlscraper, statfinder, and tablescraper
 # Input(s): HLTV website URL
 # Output(s): Game stats to excel/google sheets/csv (TBD)
+#
+# Notes to self:
+# 
+# Exiting with error(seems to be scraping correctly except for last game):
+# Traceback (most recent call last):
+#  File "<stdin>", line 2, in <module>
+#  File "<stdin>", line 21, in statfinder
+# AttributeError: 'NoneType' object has no attribute 'get'
+#
+# Last game second team hasnt been decided yet, probably the cause of error.
+# Look into error handling or ignore games that don't have teams decided
+# Not a big deal right now but will be in the future for large tournament brackets
 #########################################################################################
 
 import requests
 from bs4 import BeautifulSoup
 from datetime import date
+import csv
+
+listofkeys = ['date','event','opponent','mapPlayed','result']
+filename = "matchday-"+ str(date.today()) + ".csv"
+
+with open (filename,'w') as csvfile:
+	
+	csv_writer = csv.DictWriter(csvfile,fieldnames = listofkeys, delimiter=',')
+	
+	csv_writer.writeheader()
 
 def statfinder (matchURL):
 	startDate = '2020-02-16'
@@ -39,13 +61,10 @@ def statfinder (matchURL):
 	
 	return (team1URL, team2URL)
 
-def tablescraper (teamstats):
-	for url in teamstats:
-		gamecount = 0
-		
-		games = []
-		listofkeys = ['date','event','opponent','mapPlayed','result']
-		
+def tablescraper (statURLs):
+	gamestats = dict.fromkeys(listofkeys,None)
+	
+	for url in statURLs:
 		r = requests.get(url)
 		
 		soup = BeautifulSoup(r.text, 'html.parser')
@@ -56,19 +75,20 @@ def tablescraper (teamstats):
 		# find all tr elements, each element is a unique game.
 		# note: not using css selectors because there are 2 different tr elements used for some reason.
 		# group-2 first and group-1 first. Seems more efficient to just find all tr elements.
-		gameTable = tablesoup.find_all('tr')
+		gameTable = tablesoup.find_all('tr') 
 		
-		for game in gameTable:
-			games.append(dict.fromkeys(listofkeys,None))
-			cells = game.find_all('td')
-			games[gamecount]['date'] = (cells[0].text.strip())
-			games[gamecount]['event'] = (cells[1].text.strip())
-			games[gamecount]['opponent'] = (cells[3].text.strip())
-			games[gamecount]['mapPlayed'] = (cells[4].text.strip())
-			games[gamecount]['result'] = (cells[5].text.strip())
-			gamecount+=1
-		
-		print (games)#print games for test, need to export to csv/excel/google sheets here
+		with open (filename,'a') as csvfile:
+			
+			csv_writer = csv.DictWriter(csvfile,fieldnames = listofkeys, delimiter=',')
+			
+			for game in gameTable:
+				cells = game.find_all('td')
+				gamestats['date'] = (cells[0].text.strip())
+				gamestats['event'] = (cells[1].text.strip())
+				gamestats['opponent'] = (cells[3].text.strip())
+				gamestats['mapPlayed'] = (cells[4].text.strip())
+				gamestats['result'] = (cells[5].text.strip())
+				csv_writer.writerow(gamestats)
 
 
 gameDayURLs = []
@@ -90,5 +110,6 @@ for url in gameDayURLs:
 	gameDayURLs[urlCounter] = "https://hltv.org" + url
 	urlCounter += 1
 
+statURLs = []
 for matchURL in gameDayURLs:
 	tablescraper(statfinder(matchURL))
