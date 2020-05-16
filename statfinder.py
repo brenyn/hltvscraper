@@ -8,8 +8,10 @@
 # Output(s): URLs to team stats
 #
 # Notes to self:
-# A less janky way of doing this would be to find team identifier from team page URL
+# 1. A less janky way of doing this would be to find team identifier from team page URL
 # and use that + team name to navigate to matches tab
+#
+# 2. Only grab stats for past 3 months (complete step 1 first)
 #########################################################################################
 
 import requests
