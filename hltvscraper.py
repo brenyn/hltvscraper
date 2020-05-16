@@ -22,11 +22,6 @@ def statfinder (matchURL):
 	team1URL = "https://hltv.org" + team1Soup.find("a").get('href') + "#tab-statsBox"
 	team2URL = "https://hltv.org" + team2Soup.find("a").get('href') + "#tab-statsBox"
 	
-	
-	# BELOW THIS LINE IS TOO JANKY, PROBABLY WILL BREAK IN FUTURE, ONLY USING FOR PROTOTYPE
-	# CHANGE ACCORDING TO TODO IN FINAL VERSION
-	
-	
 	#Finding stats for team 1
 	response = requests.get(team1URL)
 	
@@ -61,36 +56,37 @@ def statfinder (matchURL):
 	
 	return (team1URL, team2URL)
 
+def tablescraper (teamstats):
+	for url in teamstats:
+		gamecount = 0
+		
+		games = []
+		listofkeys = ['date','event','opponent','mapPlayed','result']
+		
+		r = requests.get(url)
+		
+		soup = BeautifulSoup(r.text, 'html.parser')
+		
+		# only interested in results table, save results to tablesoup variable
+		tablesoup = soup.tbody
+		
+		# find all tr elements, each element is a unique game.
+		# note: not using css selectors because there are 2 different tr elements used for some reason.
+		# group-2 first and group-1 first. Seems more efficient to just find all tr elements.
+		gameTable = tablesoup.find_all('tr')
+		
+		for game in gameTable:
+			games.append(dict.fromkeys(listofkeys,None))
+			cells = game.find_all('td')
+			games[gamecount]['date'] = (cells[0].text.strip())
+			games[gamecount]['event'] = (cells[1].text.strip())
+			games[gamecount]['opponent'] = (cells[3].text.strip())
+			games[gamecount]['mapPlayed'] = (cells[4].text.strip())
+			games[gamecount]['result'] = (cells[5].text.strip())
+			gamecount+=1
+		
+		print (games)#print games for test, need to export to csv/excel/google sheets here
 
-def tablescraper (url):
-	gamecount = 0
-	
-	games = []
-	listofkeys = ['date','event','opponent','mapPlayed','result']
-
-	r = requests.get(url)
-	
-	soup = BeautifulSoup(r.text, 'html.parser')
-	
-	# only interested in results table, save results to tablesoup variable
-	tablesoup = soup.tbody
-	
-	# find all tr elements, each element is a unique game.
-	# note: not using css selectors because there are 2 different tr elements used for some reason.
-	# group-2 first and group-1 first. Seems more efficient to just find all tr elements.
-	gameTable = tablesoup.find_all('tr') 
-	
-	for game in gameTable:
-		games.append(dict.fromkeys(listofkeys,None))
-		cells = game.find_all('td')
-		games[gamecount]['date'] = (cells[0].text.strip())
-		games[gamecount]['event'] = (cells[1].text.strip())
-		games[gamecount]['opponent'] = (cells[3].text.strip())
-		games[gamecount]['mapPlayed'] = (cells[4].text.strip())
-		games[gamecount]['result'] = (cells[5].text.strip())
-		gamecount+=1	
-
-	return games
 
 gameDayURLs = []
 
@@ -110,3 +106,6 @@ for url in gameDayURLs:
 	url = gameDayURLs[urlCounter].get('href')
 	gameDayURLs[urlCounter] = "https://hltv.org" + url
 	urlCounter += 1
+
+for matchURL in gameDayURLs:
+	tablescraper(statfinder(matchURL))
