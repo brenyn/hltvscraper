@@ -15,9 +15,10 @@
 #  File "<stdin>", line 21, in statfinder
 # AttributeError: 'NoneType' object has no attribute 'get'
 #
-# Last game second team hasnt been decided yet, probably the cause of error.
-# Look into error handling or ignore games that don't have teams decided
-# Not a big deal right now but will be in the future for large tournament brackets
+# 1. Last game second team hasnt been decided yet, probably the cause of error.
+# 2. Look into error handling or ignore games that don't have teams decided
+# 3. Not a big deal right now but will be in the future for large tournament brackets w/
+# a lot of undecided games
 #########################################################################################
 
 import requests
@@ -25,7 +26,7 @@ from bs4 import BeautifulSoup
 from datetime import date
 import csv
 
-listofkeys = ['date','event','opponent','mapPlayed','result']
+listofkeys = ['date','event','homeTeam','opponent','mapPlayed','result']
 filename = "matchday-"+ str(date.today()) + ".csv"
 
 with open (filename,'w') as csvfile:
@@ -71,6 +72,9 @@ def tablescraper (statURLs):
 		
 		# only interested in results table, save results to tablesoup variable
 		tablesoup = soup.tbody
+		teamsoup = BeautifulSoup(r.text,'html.parser')
+		teamsoup = teamsoup.find("div",class_="sidebar-box")
+		teamname = teamsoup.find("span",class_="context-item-name").text.strip()
 		
 		# find all tr elements, each element is a unique game.
 		# note: not using css selectors because there are 2 different tr elements used for some reason.
@@ -85,6 +89,7 @@ def tablescraper (statURLs):
 				cells = game.find_all('td')
 				gamestats['date'] = (cells[0].text.strip())
 				gamestats['event'] = (cells[1].text.strip())
+				gamestats['homeTeam'] = teamname
 				gamestats['opponent'] = (cells[3].text.strip())
 				gamestats['mapPlayed'] = (cells[4].text.strip())
 				gamestats['result'] = (cells[5].text.strip())
